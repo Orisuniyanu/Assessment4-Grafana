@@ -1,0 +1,30 @@
+# values-template.yaml
+
+grafana:
+  adminUser: admin
+  adminPassword: admin123
+  service:
+    type: NodePort
+    nodePort: 32000
+  persistence:
+    enabled: true
+    accessModes: ["ReadWriteOnce"]
+    size: 2Gi
+  initChownData: false
+
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+alertmanager:
+  enabled: true
