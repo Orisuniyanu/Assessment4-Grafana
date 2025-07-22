@@ -1,0 +1,27 @@
+grafana:
+  adminPassword: "admin123"
+  service:
+    type: NodePort
+  initChownData:
+    enabled: false
+  service:
+    type: NodePort
+  persistence:
+    enabled: true
+    size: 2Gi
+    accessModes:
+      - ReadWriteOnce
+
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    resources:
+      requests:
+        memory: "400Mi"
+        cpu: "200m"
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
