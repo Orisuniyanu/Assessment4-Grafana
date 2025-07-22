@@ -1,27 +1,91 @@
-grafana:
-  adminPassword: "admin123"
-  service:
-    type: NodePort
-  initChownData:
-    enabled: false
-  service:
-    type: NodePort
-  persistence:
-    enabled: true
-    size: 2Gi
-    accessModes:
-      - ReadWriteOnce
-
+# Enable Prometheus and Node Exporter
 prometheus:
   prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
     retention: 7d
     resources:
       requests:
-        memory: "400Mi"
-        cpu: "200m"
+        memory: 400Mi
+        cpu: 100m
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
 
-kubeStateMetrics:
+# Grafana Configuration
+grafana:
+  initChownData:
+    enabled: false
+
+  adminUser: admin
+  adminPassword: admin
+
+  service:
+    type: NodePort
+    nodePort: 30001
+    port: 80
+
+  ingress:
+    enabled: false
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  dashboards:
+    default:
+      pod-resources:
+        gnetId: 1860
+        revision: 28
+        datasource: Prometheus
+
+      k8s-cluster-monitoring:
+        gnetId: 3119
+        revision: 1
+        datasource: Prometheus
+
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+    datasources:
+      enabled: true
+
+# Node Exporter
+prometheus-node-exporter:
   enabled: true
 
-nodeExporter:
+# Kube State Metrics
+kube-state-metrics:
   enabled: true
+
+# Alertmanager
+alertmanager:
+  enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname']
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 3h
+      receiver: 'default-receiver'
+    receivers:
+      - name: 'default-receiver'
+        email_configs:
+          - to: 'iyanuemmanuel3@gmail.com'
